@@ -129,6 +129,55 @@ int write(std::string outfile,
 
 #define imin(a,b) (a<b?a:b)
 
+__global__ void process(int width, int height, float* r, float* g, float* b)
+{
+    // thread's .x coordinates are the pixel column in the image
+    // thread's .y coordinates are the pixel row in the image
+
+    int global_pixel_row=threadIdx.y + blockIdx.y*blockDim.y;
+    int global_pixel_col=threadIdx.x + blockIdx.x*blockDim.x;
+
+    if (global_pixel_col < width &&  global_pixel_row < height)
+    {
+        // this pixel exists in the image and this is not an idle thread
+
+        // find the index in r,g,b for this pixel
+        int index=global_pixel_col + global_pixel_row * width;
+
+        // draw thread block boundaries
+        if (threadIdx.x==0 || threadIdx.x==blockDim.x-1 ||
+            threadIdx.y==0 || threadIdx.y == blockDim.y-1)
+        {
+            r[index]=1;
+            g[index]=0;
+            b[index]=0;
+        }
+        else
+        {
+            r[index]=1;
+            g[index]=1;
+            b[index]=1;
+        }
+            
+    }
+    else
+    {
+        // do nothing
+    }
+
+
+
+
+
+    // image data (r,g,b) is stored row-major (all of pixel row 0, followed by all of pixel row 1, etc.)
+    
+
+    
+
+}
+
+
+
 int main(int argc, char *argv[])
 {
     int width, height;
@@ -170,7 +219,10 @@ int main(int argc, char *argv[])
     dim3 bpg((width+tpb.x-1)/tpb.x, (height+tpb.y-1)/tpb.y);
 
     // for example ....
-    // process<<<bpg,tpb>>>(width, height, d_r, d_g, d_b);
+    process<<<bpg,tpb>>>(width, height, d_r, d_g, d_b);
+    // check to see if there were any issues with the previous kernel launch
+    gpuErrchk( cudaPeekAtLastError() );
+
 
 
     // copy data back from kernel
