@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     
     // call kernel
 
-    dim3 tpb(16, 16);
+    dim3 tpb(50, 12);
     //dim3 tpb(1, 1);
     dim3 bpg((width+tpb.x-1)/tpb.x, (height+tpb.y-1)/tpb.y);
 
