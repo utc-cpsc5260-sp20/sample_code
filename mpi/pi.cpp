@@ -33,24 +33,36 @@ int main(int argc, char *argv[])
     }
 
     //printf("%lf\n", hits*4.0/COUNT);
-    MPI_Status status;
 
-    if (rank == 0)
+    // MPI_Status status;
+    // if (rank == 0)
+    // {
+    //     for (int r=1; r<np; r++)
+    //     {
+    //         printf("receiving from %d\n", r);
+    //         int other;
+    //         MPI_Recv(&other, 1, MPI_INT, r, 0, MPI_COMM_WORLD, &status);
+    //         hits += other;
+    //     }
+
+    //     printf("%lf = 4.0* %d/%d\n", hits*4.0/(np*COUNT), hits, np*COUNT);
+    // }
+    // else
+    // {
+    //     printf("sending from %d\n", rank);
+    //     MPI_Send(&hits, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    // }
+
+    int total;
+    MPI_Reduce(&hits,&total, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank==0)
     {
-        for (int r=1; r<np; r++)
-        {
-            printf("receiving from %d\n", r);
-            int other;
-            MPI_Recv(&other, 1, MPI_INT, r, 0, MPI_COMM_WORLD, &status);
-            hits += other;
-        }
-
-        printf("%lf = 4.0* %d/%d\n", hits*4.0/(np*COUNT), hits, np*COUNT);
+        printf("%lf = 4.0* %d/%d\n", total*4.0/(np*COUNT), total, np*COUNT);
     }
     else
     {
-        printf("sending from %d\n", rank);
-        MPI_Send(&hits, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        printf("not on rank 0: %d\n", total);
     }
 
 
